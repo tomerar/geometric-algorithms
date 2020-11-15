@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
@@ -11,8 +12,25 @@ from Jarvis import Jarvis
 from JarvisMarch_StepPlot import GiftWrapping
 
 
+def timing(f):
+    def wrap(*args):
+        start = time.time()
+        ret = f(*args)
+        end = time.time()
+        hours, rem = divmod(end - start, 3600)
+        minutes, seconds = divmod(rem, 60)
+        print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+        tk.messagebox.showinfo(title="info", message="{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+        return ret
+
+    return wrap
+
+
 def main():
+
+    @timing
     def get_Graham():
+
         try:
             number_of_points = int(e1.get())
             speed = float(e2.get())
@@ -21,6 +39,7 @@ def main():
         except Exception as e:
             tk.messagebox.showwarning(title="warning ", message=str(e))
 
+    @timing
     def get_jarvis():
         try:
             number_of_points = int(e1.get())
@@ -55,11 +74,16 @@ def main():
         text="delay iterations (sec)",
         font=fontStyle
     ).grid(row=1)
+    speed_labal = tk.Label(
+        master,
+        text="convex Hull:",
+        font=fontStyle
+    ).grid(row=3)
 
     e1 = tk.Entry(master, font=fontStyle)
     e1.insert(tk.END, '10')
     e2 = tk.Entry(master, font=fontStyle)
-    e2.insert(tk.END, '0.5')
+    e2.insert(tk.END, '0.2')
 
     e1.grid(row=0, column=1)
     e2.grid(row=1, column=1)
@@ -71,7 +95,7 @@ def main():
         command=get_Graham,
         font=fontStyle
     ).grid(row=3,
-           column=0,
+           column=1,
            sticky=tk.W,
            pady=4)
     tk.Button(
@@ -79,7 +103,7 @@ def main():
         text='jarvis', command=get_jarvis,
         font=fontStyle
     ).grid(row=3,
-           column=1,
+           column=2,
            sticky=tk.W,
            pady=4)
 

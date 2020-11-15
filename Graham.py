@@ -16,6 +16,7 @@ class Graham(object):
         return True
 
     def start(self):
+        plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
         list_points = [(np.random.randint(self.range_min, 300), np.random.randint(self.range_min, self.range_max))
                        for i in range(self.number_of_points)]
@@ -52,6 +53,4 @@ class Graham(object):
         del L_lower[0]
         del L_lower[-1]
         L = L_upper + L_lower  # Build the full hull
-        plt.axis('off')
-        plt.show()
         return np.array(L)

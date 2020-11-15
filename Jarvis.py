@@ -16,6 +16,7 @@ class Jarvis(object):
         return False
 
     def start(self):
+        plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
         list_points = np.array([(np.random.randint(0, 300), np.random.randint(0, 300)) for i in range(self.number_of_points)])
         plt.figure()  # Define figure
