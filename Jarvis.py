@@ -17,7 +17,7 @@ class Jarvis(object):
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
         list_points = self.list_point
-        plt.figure()  # Define figure
+        plt.figure("Jarvis")  # Define figure
         index = 0
         n = len(list_points)
         none_list = [None] * n

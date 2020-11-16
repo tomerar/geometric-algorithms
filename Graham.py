@@ -19,7 +19,7 @@ class Graham(object):
         list_points = self.list_point
         list_points.sort()  # Sort the set of points
         list_points = np.array(list_points)  # Convert the list to numpy array
-        plt.figure()  # Create a new fig
+        plt.figure("Graham")  # Create a new fig
         L_upper = [list_points[0], list_points[1]]  # Initialize the upper part
         # Compute the upper part of the hull
         for i in range(2, len(list_points)):

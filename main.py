@@ -132,6 +132,7 @@ class PlotStat(object):
     def start(self):
         plt.close('all')
         # line 1 points
+        plt.figure("Graham vs Jarvis")
         list_range = self.list_range
         x1 = self.create_graham_list()
         y1 = list_range
