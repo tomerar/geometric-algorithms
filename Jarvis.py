@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 
 
 class Jarvis(object):
-    def __init__(self, number_of_points=10, speed=0.5, range_min=-300, range_max=300):
-        self.number_of_points = int(number_of_points)
+    def __init__(self,  speed=0.5, list_points=[]):
         self.speed = float(speed)
-        self.range_min = range_min
-        self.range_max = range_max
+        self.list_point = list_points
 
     def RightTurn(self, p1, p2, p3):
         if (p3[1] - p1[1]) * (p2[0] - p1[0]) >= (p2[1] - p1[1]) * (p3[0] - p1[0]):
@@ -18,7 +16,7 @@ class Jarvis(object):
     def start(self):
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
-        list_points = np.array([(np.random.randint(0, 300), np.random.randint(0, 300)) for i in range(self.number_of_points)])
+        list_points = self.list_point
         plt.figure()  # Define figure
         index = 0
         n = len(list_points)
@@ -30,7 +28,8 @@ class Jarvis(object):
             none_list[i] = pointOnHull
             endpoint = list_points[0]
             for j in range(1, n):
-                if (endpoint[0] == pointOnHull[0] and endpoint[1] == pointOnHull[1]) or not self.RightTurn(list_points[j], none_list[i], endpoint):
+                if (endpoint[0] == pointOnHull[0] and endpoint[1] == pointOnHull[1]) or not self.RightTurn(
+                        list_points[j], none_list[i], endpoint):
                     endpoint = list_points[j]
             i = i + 1
             pointOnHull = endpoint
@@ -58,4 +57,3 @@ class Jarvis(object):
         plt.show(block=False)
         plt.pause(self.speed)
         return P
-

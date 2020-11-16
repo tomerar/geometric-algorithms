@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 
 
 class Graham(object):
-    def __init__(self, number_of_points=10, speed=0.5, range_min=-300, range_max=300):
-        self.number_of_points = int(number_of_points)
+    def __init__(self, speed=0.5, list_points=[]):
         self.speed = float(speed)
-        self.range_min = range_min
-        self.range_max = range_max
+        self.list_point = list_points
 
     def RightTurn(self, p1, p2, p3):
         if (p3[1] - p1[1]) * (p2[0] - p1[0]) >= (p2[1] - p1[1]) * (p3[0] - p1[0]):
@@ -18,8 +16,7 @@ class Graham(object):
     def start(self):
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
-        list_points = [(np.random.randint(self.range_min, 300), np.random.randint(self.range_min, self.range_max))
-                       for i in range(self.number_of_points)]
+        list_points = self.list_point
         list_points.sort()  # Sort the set of points
         list_points = np.array(list_points)  # Convert the list to numpy array
         plt.figure()  # Create a new fig

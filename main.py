@@ -1,11 +1,10 @@
-import time
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
 
+from ExcelRead import ExcelRead
 from Graham import Graham
 from Jarvis import Jarvis
-import sys
 import time
 
 import numpy as np
@@ -177,14 +176,29 @@ def timing(f):
     return wrap
 
 
+range_min = -300
+range_max = 300
+
+
 def main():
+    def get_point_from_excel():
+        path = number_of_points = e4.get()
+        exc = ExcelRead(path)
+        return exc.get_list_point()
+
     @timing
     def get_Graham():
 
         try:
             number_of_points = int(e1.get())
             speed = float(e2.get())
-            graham = Graham(number_of_points=number_of_points, speed=speed)
+            if e4.get() == '':
+                list_points = [(np.random.randint(range_min, range_max), np.random.randint(range_min, range_max))
+                               for i in range(number_of_points)]
+            else:
+                list_points = get_point_from_excel()
+            print(list_points)
+            graham = Graham(list_points=list_points, speed=speed)
             graham.start()
         except Exception as e:
             tk.messagebox.showwarning(title="warning ", message=str(e))
@@ -194,7 +208,15 @@ def main():
         try:
             number_of_points = int(e1.get())
             speed = float(e2.get())
-            jarvis = Jarvis(number_of_points=number_of_points, speed=speed)
+            if e4.get() == '':
+                list_points = np.array([(np.random.randint(range_min, range_max),
+                                         np.random.randint(range_min, range_max))
+                                        for i in range(number_of_points)])
+            else:
+                list_points = np.array(get_point_from_excel())
+
+            print(list_points)
+            jarvis = Jarvis(list_points=list_points, speed=speed)
             jarvis.start()
         except Exception as e:
             traceback.print_exc()
@@ -243,18 +265,25 @@ def main():
         font=fontStyle
     ).grid(row=4, column=0)
 
+    speed_labal = tk.Label(
+        master,
+        text="load excel points path",
+        font=fontStyle
+    ).grid(row=5, column=0)
+
     e1 = tk.Entry(master, font=fontStyle)
     e1.insert(tk.END, '10')
     e2 = tk.Entry(master, font=fontStyle)
     e2.insert(tk.END, '0.2')
     e3 = tk.Entry(master, font=fontStyle)
     e3.insert(tk.END, '11')
+    e4 = tk.Entry(master, font=fontStyle)
+    e4.insert(tk.END, '')
 
     e1.grid(row=0, column=1)
     e2.grid(row=1, column=1)
     e3.grid(row=4, column=1)
-    # number_of_points = e1.get()
-    # P = [(np.random.randint(-300, 300), np.random.randint(-300, 300)) for i in range(N)]
+    e4.grid(row=5, column=1)
     tk.Button(
         master,
         text='Graham',
