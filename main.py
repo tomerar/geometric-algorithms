@@ -277,7 +277,7 @@ def main():
     e2 = tk.Entry(master, font=fontStyle)
     e2.insert(tk.END, '0.2')
     e3 = tk.Entry(master, font=fontStyle)
-    e3.insert(tk.END, '11')
+    e3.insert(tk.END, '10')
     e4 = tk.Entry(master, font=fontStyle)
     e4.insert(tk.END, '')
 
