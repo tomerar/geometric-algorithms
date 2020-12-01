@@ -3,12 +3,137 @@ import tkinter.font as tkFont
 import traceback
 
 from ExcelRead import ExcelRead
-from Graham import Graham
-from Jarvis import Jarvis
+# from Graham import Graham
+# from Jarvis import Jarvis
 import time
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+range_min = -300
+range_max = 300
+
+click_flag = True
+wait_time = 5
+tk_global = None
+
+
+def wait_by():
+    global click_flag
+    global wait_time
+    if not click_flag:
+        time.sleep(wait_time)
+        click_flag = not click_flag
+
+
+
+class Jarvis(object):
+    def __init__(self, speed=0.5, list_points=[]):
+        self.speed = float(speed)
+        self.list_point = list_points
+
+    def RightTurn(self, p1, p2, p3):
+        if (p3[1] - p1[1]) * (p2[0] - p1[0]) >= (p2[1] - p1[1]) * (p3[0] - p1[0]):
+            return True
+        return False
+
+    def start(self):
+        plt.close('all')
+        # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
+        list_points = self.list_point
+        plt.figure("Jarvis")  # Define figure
+        index = 0
+        n = len(list_points)
+        none_list = [None] * n
+        l = np.where(list_points[:, 0] == np.min(list_points[:, 0]))
+        pointOnHull = list_points[l[0][0]]
+        i = 0
+        while True:
+            wait_by()
+            none_list[i] = pointOnHull
+            endpoint = list_points[0]
+            for j in range(1, n):
+                if (endpoint[0] == pointOnHull[0] and endpoint[1] == pointOnHull[1]) or not self.RightTurn(
+                        list_points[j], none_list[i], endpoint):
+                    endpoint = list_points[j]
+            i = i + 1
+            pointOnHull = endpoint
+            J = np.array([none_list[k] for k in range(n) if none_list[k] is not None])
+            plt.clf()  # Clear plot
+            plt.plot(J[:, 0], J[:, 1], 'b-', picker=5)  # Plot lines
+            plt.plot(list_points[:, 0], list_points[:, 1], ".r")  # Plot points
+            plt.axis('off')  # No axis
+            plt.show(block=False)  # Close plot
+            plt.pause(self.speed)  # Mini-pause before closing plot
+            index += 1
+            if endpoint[0] == none_list[0][0] and endpoint[1] == none_list[0][1]:
+                break
+        for i in range(n):
+            if none_list[-1] is None:
+                del none_list[-1]
+        P = np.array(none_list)
+
+        # Plot final hull
+        plt.clf()
+        plt.plot(P[:, 0], P[:, 1], 'b-', picker=5)
+        plt.plot([P[-1, 0], P[0, 0]], [P[-1, 1], P[0, 1]], 'b-', picker=5)
+        plt.plot(list_points[:, 0], list_points[:, 1], ".r")
+        plt.axis('off')
+        plt.show(block=False)
+        plt.pause(self.speed)
+        return P
+
+
+class Graham(object):
+    def __init__(self, speed=0.5, list_points=[]):
+        self.speed = float(speed)
+        self.list_point = list_points
+
+    def RightTurn(self, p1, p2, p3):
+        if (p3[1] - p1[1]) * (p2[0] - p1[0]) >= (p2[1] - p1[1]) * (p3[0] - p1[0]):
+            return False
+        return True
+
+    def start(self):
+        plt.close('all')
+        # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
+        list_points = self.list_point
+        list_points.sort()  # Sort the set of points
+        list_points = np.array(list_points)  # Convert the list to numpy array
+        plt.figure("Graham")  # Create a new fig
+        L_upper = [list_points[0], list_points[1]]  # Initialize the upper part
+        # Compute the upper part of the hull
+        for i in range(2, len(list_points)):
+            wait_by()
+            L_upper.append(list_points[i])
+            while len(L_upper) > 2 and not self.RightTurn(L_upper[-1], L_upper[-2], L_upper[-3]):
+                del L_upper[-2]
+            new_point_list = np.array(L_upper)
+            plt.clf()  # Clear plt.fig
+            plt.plot(new_point_list[:, 0], new_point_list[:, 1], 'b-', picker=5)  # Plot lines
+            plt.plot(list_points[:, 0], list_points[:, 1], ".r")  # Plot points
+            plt.axis('off')  # No axis
+            plt.show(block=False)  # Close plot
+            plt.pause(self.speed)  # Mini-pause before closing plot
+
+        L_lower = [list_points[-1], list_points[-2]]  # Initialize the lower part
+        # Compute the lower part of the hull
+        for i in range(len(list_points) - 3, -1, -1):
+            wait_by()
+            L_lower.append(list_points[i])
+            while len(L_lower) > 2 and not self.RightTurn(L_lower[-1], L_lower[-2], L_lower[-3]):
+                del L_lower[-2]
+            new_point_list = np.array(L_upper + L_lower)
+            plt.clf()  # Clear plt.fig
+            plt.plot(new_point_list[:, 0], new_point_list[:, 1], 'b-', picker=5)  # Plot lines
+            plt.plot(list_points[:, 0], list_points[:, 1], ".r")  # Plot points
+            plt.axis('off')  # No axis
+            plt.show(block=False)  # Close plot
+            plt.pause(self.speed)  # Mini-pause befor closing plot
+        del L_lower[0]
+        del L_lower[-1]
+        L = L_upper + L_lower  # Build the full hull
+        return np.array(L)
 
 
 class JarvisP(object):
@@ -177,11 +302,17 @@ def timing(f):
     return wrap
 
 
-range_min = -300
-range_max = 300
+def get_color():
+    global click_flag
+    color = "green" if click_flag else "red"
+    return color
 
 
 def main():
+    def stop_start():
+        global click_flag
+        click_flag = not click_flag
+
     def get_point_from_excel():
         path = number_of_points = e4.get()
         exc = ExcelRead(path)
@@ -229,7 +360,7 @@ def main():
             p.start()
         except Exception as e:
             traceback.print_exc()
-
+    global wait_time
     master = tk.Tk(className="geometric-algorithms")
     # Gets the requested values of the height and widht.
     windowWidth = master.winfo_reqwidth()
@@ -309,6 +440,16 @@ def main():
         font=fontStyle
     ).grid(row=4,
            column=2,
+           sticky=tk.W,
+           pady=4)
+
+    tk.Button(
+        master,
+        text=f'pause for {wait_time} secs', command=stop_start,
+        font=fontStyle,
+        bg="grey"
+    ).grid(row=3,
+           column=3,
            sticky=tk.W,
            pady=4)
 
