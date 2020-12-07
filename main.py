@@ -1,7 +1,9 @@
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
-
+import xlsxwriter
+import xlrd
+import pathlib
 from ExcelRead import ExcelRead
 # from Graham import Graham
 # from Jarvis import Jarvis
@@ -24,7 +26,6 @@ def wait_by():
     if not click_flag:
         time.sleep(wait_time)
         click_flag = not click_flag
-
 
 
 class Jarvis(object):
@@ -309,12 +310,81 @@ def get_color():
 
 
 def main():
+    def builder_point():
+        class PointBuilder:
+            def __init__(self, point, excel_name, e4):
+                self.point = point
+                self.xs = list(point.get_xdata())
+                self.ys = list(point.get_ydata())
+                self.xp = []
+                self.yp = []
+                self.workbook = None  # xlsxwriter.Workbook(self.excel_name)
+                self.worksheet = None  # self.workbook.add_worksheet()
+                self.index_excel = 0
+                self.excel_name = excel_name
+                self.clear()
+                self.absolute_path = fr"{pathlib.Path(__file__).parent.absolute()}\{self.excel_name}"
+                e4.delete(0, 'end')
+                e4.insert(tk.END, self.absolute_path)
+                self.add_row('x', 'y')
+                self.cid = point.figure.canvas.mpl_connect('button_press_event', self)
+
+            def clear(self):
+                self.workbook = xlsxwriter.Workbook(self.excel_name)
+                self.worksheet = self.workbook.add_worksheet()
+                self.worksheet.write(self.index_excel, 0, '')  # Writes a strin
+                self.workbook.close()
+
+            def add_row(self, x, y):
+                wbRD = xlrd.open_workbook(self.excel_name)
+                sheets = wbRD.sheets()
+
+                # open the same file for writing (just don't write yet)
+                wb = xlsxwriter.Workbook(self.excel_name)
+
+                # run through the sheets and store sheets in workbook
+                # this still doesn't write to the file yet
+                for sheet in sheets:  # write data from old file
+                    newSheet = wb.add_worksheet(sheet.name)
+                    for row in range(sheet.nrows):
+                        for col in range(sheet.ncols):
+                            newSheet.write(row, col, sheet.cell(row, col).value)
+
+                newSheet.write(self.index_excel, 0, x)  # Writes a string
+                newSheet.write(self.index_excel, 1, y)  # Writes a string
+                self.index_excel += 1
+                wb.close()  # THIS writes
+
+            def __call__(self, event):
+                print('click', event)
+                if event.inaxes != self.point.axes:
+                    return
+                self.xs.append(event.xdata)
+                self.ys.append(event.ydata)
+                self.xp.append(event.xdata)
+                self.yp.append(event.ydata)
+                self.add_row(event.xdata, event.ydata)
+                self.point.set_data(self.xs, self.ys)
+                self.point.figure.canvas.draw()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_title('click to build points')
+        axes = plt.gca()
+        axes.set_xlim([-300, 300])
+        axes.set_ylim([-300, 300])
+        point, = ax.plot([], [], ".r")  # empty line
+        PointBuilder = PointBuilder(point=point, excel_name="PointBuilder.xlsx", e4=e4)
+        print()
+        plt.show()
+
     def stop_start():
         global click_flag
         click_flag = not click_flag
 
     def get_point_from_excel():
         path = number_of_points = e4.get()
+        print(path)
         exc = ExcelRead(path)
         return exc.get_list_point()
 
@@ -327,12 +397,16 @@ def main():
             if e4.get() == '':
                 list_points = [(np.random.randint(range_min, range_max), np.random.randint(range_min, range_max))
                                for i in range(number_of_points)]
+                print(f"e4.get() == '' {list_points}")
             else:
                 list_points = get_point_from_excel()
+                print(f"get_point_from_excel {list_points}")
             print(list_points)
             graham = Graham(list_points=list_points, speed=speed)
             graham.start()
         except Exception as e:
+            print(f"fail  {e}")
+            traceback.print_exc()
             tk.messagebox.showwarning(title="warning ", message=str(e))
 
     @timing
@@ -360,6 +434,7 @@ def main():
             p.start()
         except Exception as e:
             traceback.print_exc()
+
     global wait_time
     master = tk.Tk(className="geometric-algorithms")
     # Gets the requested values of the height and widht.
@@ -453,8 +528,18 @@ def main():
            sticky=tk.W,
            pady=4)
 
+    tk.Button(
+        master,
+        text=f'Point builder', command=builder_point,
+        font=fontStyle,
+    ).grid(row=1,
+           column=3,
+           sticky=tk.W,
+           pady=4)
+
     tk.mainloop()
 
 
 if __name__ == '__main__':
+    print(pathlib.Path(__file__).parent.absolute())
     main()
