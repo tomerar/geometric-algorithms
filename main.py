@@ -18,15 +18,25 @@ range_max = 300
 click_flag = True
 wait_time = 5
 tk_global = None
+wait_sum = 0
+
 
 
 def wait_by():
     global click_flag
     global wait_time
-    if not click_flag:
-        time.sleep(wait_time)
-        click_flag = not click_flag
+    global pause_var
+    global master
+    global wait_sum
+    start_time = 0
+    end_time = 0
 
+    if not click_flag:
+        start_time = time.time()
+        master.wait_variable(pause_var)
+        end_time = time.time()
+        wait_sum += end_time - start_time
+    
 
 class Jarvis(object):
     def __init__(self, speed=0.5, list_points=[]):
@@ -39,6 +49,8 @@ class Jarvis(object):
         return False
 
     def start(self):
+        global wait_sum
+        wait_sum = 0
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
         list_points = self.list_point
@@ -96,6 +108,8 @@ class Graham(object):
         return True
 
     def start(self):
+        global wait_sum
+        wait_sum = 0
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
         list_points = self.list_point
@@ -294,7 +308,7 @@ def timing(f):
         start = time.time()
         ret = f(*args)
         end = time.time()
-        hours, rem = divmod(end - start, 3600)
+        hours, rem = divmod(end - start - wait_sum, 3600)
         minutes, seconds = divmod(rem, 60)
         print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
         tk.messagebox.showinfo(title="info", message="{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
@@ -380,7 +394,12 @@ def main():
 
     def stop_start():
         global click_flag
+        global pause_var
+        
         click_flag = not click_flag
+        if click_flag:
+            pause_var.set(pause_var.get()+1)
+            
 
     def get_point_from_excel():
         path = number_of_points = e4.get()
@@ -436,7 +455,10 @@ def main():
             traceback.print_exc()
 
     global wait_time
+    global master
+    global pause_var
     master = tk.Tk(className="geometric-algorithms")
+    pause_var = tk.IntVar()
     # Gets the requested values of the height and widht.
     windowWidth = master.winfo_reqwidth()
     windowHeight = master.winfo_reqheight()
@@ -518,9 +540,10 @@ def main():
            sticky=tk.W,
            pady=4)
 
-    tk.Button(
+    global pause_button
+    pause_button = tk.Button(
         master,
-        text=f'pause for {wait_time} secs', command=stop_start,
+        text=f'Stop / Start', command=stop_start,
         font=fontStyle,
         bg="grey"
     ).grid(row=3,
