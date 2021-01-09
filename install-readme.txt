@@ -10,6 +10,6 @@ before installetion you must perform the preperations:
 		   tkinter \
 		   xlrd==1.2
 2. run pip install cx_Freeze and idna.
-3. change the version number in install.py .
-4. run "python install.py build"
+3. change the version number in setup.py .
+4. run "python setup.py build"
 5. hope there will be no errors. Good luck !

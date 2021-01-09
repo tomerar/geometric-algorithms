@@ -1,3 +1,5 @@
+print("convex hull app is loading...")
+print("please wait")
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
@@ -244,8 +246,6 @@ class PlotStat(object):
         self.start_range = start_range
         self.end_range = end_range
         self.list_range = [2 ** x for x in list(range(self.start_range, self.end_range))]
-        # self.list_range = [x for x in list(range(self.start_range, self.end_range, 50)]
-        print(self.list_range)
 
     def create_jarvis_list(self):
         list_jarvis = []
@@ -276,16 +276,11 @@ class PlotStat(object):
         list_range = self.list_range
         x1 = self.create_graham_list()
         y1 = list_range
-        print(f"x1 {x1}")
-        print(f"y1 {y1}")
-        print()
         # plotting the line 1 points
         plt.plot(x1, y1, label="graham")
         # line 2 points
         x2 = self.create_jarvis_list()
         y2 = list_range
-        print(f"x2 {x2}")
-        print(f"y2 {y2}")
         # plotting the line 2 points
         plt.plot(x2, y2, label="jarvis")
 
@@ -310,7 +305,6 @@ def timing(f):
         end = time.time()
         hours, rem = divmod(end - start - wait_sum, 3600)
         minutes, seconds = divmod(rem, 60)
-        print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
         tk.messagebox.showinfo(title="info", message="{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
         return ret
 
@@ -370,7 +364,6 @@ def main():
                 wb.close()  # THIS writes
 
             def __call__(self, event):
-                print('click', event)
                 if event.inaxes != self.point.axes:
                     return
                 self.xs.append(event.xdata)
@@ -389,7 +382,6 @@ def main():
         axes.set_ylim([-300, 300])
         point, = ax.plot([], [], ".r")  # empty line
         PointBuilder = PointBuilder(point=point, excel_name="PointBuilder.xlsx", e4=e4)
-        print()
         plt.show()
 
     def stop_start():
@@ -403,7 +395,6 @@ def main():
 
     def get_point_from_excel():
         path = number_of_points = e4.get()
-        print(path)
         exc = ExcelRead(path)
         return exc.get_list_point()
 
@@ -416,15 +407,11 @@ def main():
             if e4.get() == '':
                 list_points = [(np.random.randint(range_min, range_max), np.random.randint(range_min, range_max))
                                for i in range(number_of_points)]
-                print(f"e4.get() == '' {list_points}")
             else:
                 list_points = get_point_from_excel()
-                print(f"get_point_from_excel {list_points}")
-            print(list_points)
             graham = Graham(list_points=list_points, speed=speed)
             graham.start()
         except Exception as e:
-            print(f"fail  {e}")
             traceback.print_exc()
             tk.messagebox.showwarning(title="warning ", message=str(e))
 
@@ -440,7 +427,6 @@ def main():
             else:
                 list_points = np.array(get_point_from_excel())
 
-            print(list_points)
             jarvis = Jarvis(list_points=list_points, speed=speed)
             jarvis.start()
         except Exception as e:
@@ -462,7 +448,6 @@ def main():
     # Gets the requested values of the height and widht.
     windowWidth = master.winfo_reqwidth()
     windowHeight = master.winfo_reqheight()
-    print("Width", windowWidth, "Height", windowHeight)
 
     # Gets both half the screen width/height and window width/height
     positionRight = int(master.winfo_screenwidth() / 2 - windowWidth / 2)
@@ -564,5 +549,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print(pathlib.Path(__file__).parent.absolute())
     main()
