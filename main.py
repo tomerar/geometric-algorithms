@@ -38,7 +38,7 @@ def wait_by():
         master.wait_variable(pause_var)
         end_time = time.time()
         wait_sum += end_time - start_time
-    
+
 
 class Jarvis(object):
     def __init__(self, speed=0.5, list_points=[]):
@@ -114,6 +114,7 @@ class Graham(object):
         wait_sum = 0
         plt.close('all')
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
+        self.list_point.sort()
         list_points = self.list_point
         list_points.sort()  # Sort the set of points
         list_points = np.array(list_points)  # Convert the list to numpy array
@@ -154,8 +155,8 @@ class Graham(object):
 
 
 class JarvisP(object):
-    def __init__(self, number_of_points=10, speed=0.5, range_min=-300, range_max=300):
-        self.number_of_points = int(number_of_points)
+    def __init__(self, number_of_points, speed=0.5, range_min=-300, range_max=300):
+        self.number_of_points_list = number_of_points
         self.speed = float(speed)
         self.range_min = range_min
         self.range_max = range_max
@@ -167,10 +168,7 @@ class JarvisP(object):
 
     def start(self):
         start_time = time.time()
-        # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
-        list_points = np.array(
-            [(np.random.randint(0, 300), np.random.randint(0, 300)) for i in range(self.number_of_points)])
-        # list_points.sort()  # Sort the set of points
+        list_points = np.array(self.number_of_points_list)
         index = 0
         n = len(list_points)
         none_list = [None] * n
@@ -201,8 +199,8 @@ class JarvisP(object):
 
 
 class GrahamP(object):
-    def __init__(self, number_of_points=10, speed=0.5, range_min=-300, range_max=300):
-        self.number_of_points = int(number_of_points)
+    def __init__(self, number_of_points, speed=0.5, range_min=-300, range_max=300):
+        self.number_of_points = number_of_points
         self.speed = float(speed)
         self.range_min = range_min
         self.range_max = range_max
@@ -215,8 +213,10 @@ class GrahamP(object):
     def start(self):
         start_time = time.time()
         # By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
-        list_points = [(np.random.randint(self.range_min, 300), np.random.randint(self.range_min, self.range_max))
-                       for i in range(self.number_of_points)]
+        # list_points = [(np.random.randint(self.range_min, 300), np.random.randint(self.range_min, self.range_max))
+        #                for i in range(self.number_of_points)]
+        list_points = self.number_of_points
+        list_points.sort()
         # list_points.sort()  # Sort the set of points
         list_points = np.array(list_points)  # Convert the list to numpy array
         L_upper = [list_points[0], list_points[1]]  # Initialize the upper part
@@ -242,16 +242,31 @@ class GrahamP(object):
 
 
 class PlotStat(object):
-    def __init__(self, start_range=1, end_range=5):
+    def __init__(self, start_range=1, end_range=5, min_range=-300, max_range=300):
+        self.min_range = min_range
+        self.max_range = max_range
         self.start_range = start_range
         self.end_range = end_range
         self.list_range = [2 ** x for x in list(range(self.start_range, self.end_range))]
+        self.matrix_list = self.create_all_matrix(self.list_range)
+
+    def create_all_matrix(self, list_range):
+        list_t = []
+        for num_point in list_range:
+            list_t.append(
+                [
+                    (np.random.randint(self.min_range, self.max_range),
+                     np.random.randint(self.min_range, self.max_range))
+                    for i in range(num_point)
+                ]
+            )
+        return list_t
 
     def create_jarvis_list(self):
         list_jarvis = []
-        list_range = self.list_range
+        list_range = self.matrix_list
         for range_X in list_range:
-            number_of_points = int(range_X)
+            number_of_points = range_X
             speed = float(0.00000001)
             jarvis = JarvisP(number_of_points=number_of_points, speed=speed)
             time_long = jarvis.start()
@@ -260,9 +275,9 @@ class PlotStat(object):
 
     def create_graham_list(self):
         list_graham = []
-        list_range = self.list_range
+        list_range = self.matrix_list
         for range_X in list_range:
-            number_of_points = int(range_X)
+            number_of_points = range_X
             speed = float(0.00000001)
             graham = GrahamP(number_of_points=number_of_points, speed=speed)
             time_long = graham.start()
@@ -387,11 +402,10 @@ def main():
     def stop_start():
         global click_flag
         global pause_var
-        
+
         click_flag = not click_flag
         if click_flag:
-            pause_var.set(pause_var.get()+1)
-            
+            pause_var.set(pause_var.get() + 1)
 
     def get_point_from_excel():
         path = number_of_points = e4.get()
